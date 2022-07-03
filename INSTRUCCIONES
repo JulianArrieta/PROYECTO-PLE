@@ -2,4 +2,5 @@ TENER EN CUENTA LOS SIGUIENTES PUNTOS PARA LA COMPRENSIÓN DEL PROYECTO
 1. El articulo cientifíco fue hecho en R markdown, por lo que el código para cada elemento que hace parte de el se encuentran en el archivo "Articulo.Rmd"
 2. Ese archivo se puede correr en Rstudio, se aconseja ejecutar los chunks en el orden mismo en el que van apareciendo en el código
 3. Los otros scripts de R son en caso de que se quiera ver más en detalle el código para el análisis de cada cosa
-4. a su vez también se encuentra el archivo RData donde están todos los objetos (dataframes y vectores) necesarios para poder correr cada script y el artículo 
+4. a su vez también se encuentra el archivo "Proyecto.RData" donde están todos los objetos (dataframes y vectores) necesarios para poder correr cada script 
+y el artículo 
