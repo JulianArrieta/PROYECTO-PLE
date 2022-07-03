@@ -1,0 +1,557 @@
+---
+title: "Análisis de cultivos de café en las distintas regiones de Colombia"
+author: 
+   - Julian David Arrieta Barriosnuevo  
+   - Isaac David Mendoza Correa  
+   - Ronny David Sierra Vence  
+   - Richard José Ospina Ortega
+output: pdf_document
+date: '2022-07-01'
+---
+
+### Resumen
+
+El presente proyecto se realizó con el fin de llegar a un análisis de distintas variables que se presentan en los cultivos de café en Colombia, donde se tomó como referencia el área cultivada de café, el precio del café por año y la producción mensual del café en Colombia. Los datos que se pretenden observar fueron obtenidos a través de la página web de la Federación Nacional de Cafeteros de Colombia que fueron utilizados para visualizar el enfoque de producción del café en las zonas regionales y cómo ha variado en el transcurso del tiempo. El análisis de los datos es representado de manera gráfica, como también la representación de los modelos de datos de forma didáctica, de esta manera nos permitió conocer el comportamiento de los cultivos de café en el país Colombiano. Se observa el comportamiento de las variables dispuestas a los largo de los años hasta la actualidad, para llegar a conclusiones con respecto a la producción del café en Colombia.
+
+\paragraph{Palabras clave:}
+
+Estadística, Café, Producción, Área, Correlación
+
+### Abstract
+
+The present project was carried out in order to reach an analysis of different variables that occur in coffee crops in Colombia, where the cultivated area of coffee, the price of coffee per year and the monthly production of coffee were taken as reference. In colombia. The data to be observed was obtained through the website of the National Federation of Coffee Growers of Colombia, which was used to visualize the approach to coffee production in regional areas and how it has varied over time. The analysis of the data is represented graphically, as well as the representation of the data models in a didactic way, in this way it allowed us to know the behavior of coffee crops in the Colombian country. The behavior of the variables arranged over the years to the present is observed, to reach conclusions regarding the production of coffee in Colombia.
+
+\paragraph{Keywords:}
+
+Statistics, Coffee, Production, Area, Correlation
+
+## Introducción
+
+Producción de café en Colombia el desarrollo más notable en la producción de café en Colombia fue la tecnificación de los cafetales que se inició en la década de 1970 y resultó en tecnificación del 73% de el área cafetalera, es decir para un cultivo de alto rendimiento.
+
+El comercio del café es una parte importante de la actividad económica de Colombia. No hace falta remontarse al siglo pasado, ni a principios del presente, las cifras muestran que en la década de 1950 el café representaba el 10% del PIB y casi el 30% de la producción agrícola. En 1991, el café representó el 5,3% del PIB.
+
+El área sembrada de café sembrada en las distintas regiones de colombia viendo sus diferentes comportamientos en los diferentes años, serán mostrada mediantes diferentes grafica donde se notara la región que más cultivó café fue la región andina. Para el desarrollo de este trabajo planteamos el siguiente objetivo general: Obtener los cambios que ha tenido el café durante los años en cuanto a precio interno, áreas sembradas y producción.
+
+## Objetivos Específicos
+
+-   Determinar el aumento del café en los diferentes años por región
+-   Evaluar la evolución del área de cultivo de café en diferentes regiones de Colombia a través de gráficas
+-   Comprobar con regresión lineal si el área de cultivo y la cantidad de café producida influyen en el precio interno del café
+
+# Descripción y análisis
+
+```{r message=FALSE, echo=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(reshape)
+library(knitr)
+library(readxl)
+library(paletteer)
+```
+
+La siguiente tabla muestra el área con café cultivada por departamento.
+
+```{r echo=FALSE}
+area_anual <- read_excel("area anual.xlsx")
+kable(area_anual[,c(1, 2, 3, 20, 21)], caption = "Miles de Hectareas por Departamento")
+años <- c(2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021)
+```
+
+Para poder hacer un mejor análisis de los datos que se tienen, se procede a hacer el análisis por región de Colombia (Amazónica, Andina, Caribe, Orinoquía, Pacífica).
+
+### Región Amazonica
+
+```{r echo=FALSE}
+amazonica <- c('Caquetá', 'Putumayo')
+amazonica_num <- c(6, 18)
+ramazonica <- area_anual[amazonica_num, ]
+ramazonica2 <- ramazonica[, -1]
+tamazonica <- t(ramazonica2)
+caqueta <- tamazonica[, 1]
+putumayo <- tamazonica[, 2]
+ramazonica3 <- data.frame(años, caqueta, putumayo)
+R_amazonica <- melt(ramazonica3, id.vars = "años")
+```
+
+Los departamentos de la región que tienen área de cultivo de café son: `r amazonica` y algunos de sus datos se pueden observar en la siguiente tabla:
+
+```{=tex}
+\begin{center}
+Tabla 2: Área cultivada con café total (Región Amazónica) 
+\end{center}
+```
+| Departamento | 2007 | ... | 2021    |
+|--------------|------|:---:|---------|
+| Caquetá      | 2,8  | ... | 3,72998 |
+| Putumayo     | NA   | ... | 0,20938 |
+
+el área máxima de la región fue:
+
+```{r}
+kable(R_amazonica[which.max(R_amazonica$value), ])
+```
+
+En la siguiente gráfica se puede observar el cambio con el pasar de los años en el área de cultivo de cada departamento:
+
+```{r echo=FALSE, warning=FALSE}
+R_amazonica%>%
+  ggplot(aes(x = años, y = value, color = variable))+
+  geom_line(lwd = 0.7)+
+  guides(color = guide_legend(title = "Departamentos"))+
+  ggtitle("Área cultivada con café total (Región Amazonica)")+
+  labs(x = "Año", y = "Miles de Hectareas")+
+  scale_color_discrete(labels = amazonica)
+```
+
+La región amazonica es de las regiones más débiles en cuanto a cultivo de café pues de sus 6 departamentos solo dos participan en el cultivo de café y adicionalmente son de los departamentos que más tarde entraron al cultivo de café, teniendo en cuenta los datos, pues Caquetá no entraría sino hasta el 2007 y el putumayo en el 2013.
+
+```{r echo=FALSE}
+total1 <- ramazonica%>%
+  select_if(is.numeric)%>%
+  colSums(na.rm = TRUE)
+total1
+print(paste("En promedio, cada año la región tenía cerca de " ,round(mean(total1, na.rm = TRUE)), "miles de hectareas "))
+```
+
+### Región Andina
+
+```{r echo=FALSE, warning=FALSE}
+andina <- c('N. Santander', 'Santander', 'Boyacá', 'Cundinamarca', 'Tolima', 'Huila',
+            'Antioquia', 'Caldas', 'Quindío', 'Risaralda' )
+andina_num <- c(17, 21, 4, 11, 22, 12, 1, 5, 19, 20 )
+randina <- area_anual[andina_num, ]
+randina2 <- randina[, -1]
+tandina <- t(randina2) 
+n.santander <- tandina[, 1]
+santander <- tandina[, 2]
+boyaca <- tandina[, 3]
+cundinamarca <- tandina[, 4]
+tolima <- tandina[, 5]
+huila <- tandina[, 6]
+antioquia <- tandina[,7]
+caldas <- tandina[, 8]
+quindio <- tandina[, 9]
+risaralda <- tandina[, 10]
+
+randina3 <- data.frame(años, n.santander, santander, boyaca, cundinamarca, tolima, huila, antioquia, caldas, quindio, risaralda)
+R_andina <- melt(randina3, id.vars = "años")
+```
+
+La regón Andina (`r andina`), es de las regiones principales en lo que respecta a cultivo de café, pues todos sus departamentos dedican muchos recursos al cultivo de café, además de que el eje cafetero se encuentra comprendida dentro del area Andina, por lo que es de esperar que sea la región con más área y más crecimiento en la mayoría de sus departamentos.
+
+```{=tex}
+\begin{center}
+Tabla 3: Área cultivada con café total (Región Andina) 
+\end{center}
+```
+| Departamento | 2002       | ... | 2021      |
+|--------------|------------|:---:|-----------|
+| N. Santander | 32,0538    | ... | 22,88864  |
+| Santander    | 42,09321   | ... | 53,02583  |
+| Boyaca       | 11,3563667 | ... | 10,23627  |
+| Cundinamarca | 55,4449889 | ... | 29,63722  |
+| Tolima       | 105,557228 | ... | 107,02817 |
+| Huila        | 78,23214   | ... | 144,12276 |
+| Antioquia    | 127,99232  | ... | 116,29093 |
+| Caldas       | 88,82411   | ... | 59,28176  |
+| Quindio      | 44,52375   | ... | 18,87127  |
+| Risaralda    | 59,38344   | ... | 43,38683  |
+
+```{r echo=FALSE, warning=FALSE}
+color <- paletteer_d("colorBlindness::paletteMartin")
+R_andina%>%
+  ggplot(aes(x = años, y = value, color = variable))+
+  geom_line(lwd = 0.7)+
+  guides(color = guide_legend(title = "Departamentos"))+
+  ggtitle("Área cultivada con café total (Región Andina)")+
+  labs(x = "Año", y = "Miles de Hectareas")+
+  scale_color_discrete(labels = andina)+
+  scale_color_manual(values = color)
+```
+
+Es fácilmente visible como las cantidades de área que se dedican al cultivo de café en esta región son muy superiores, y en terminos generales teniendo poco cambio, con excepción del departamento del huila que tuvo el crecimiento más importante de todos los departamentos de la región llegando a ser incluso el que más terreno dedica al cultivo de café.
+
+```{r echo=FALSE}
+total2 <- randina%>%
+  select_if(is.numeric)%>%
+  colSums()
+print(paste("En promedio, cada año la región tenía cerca de " ,round(mean(total2)), "miles de hectareas "))
+```
+
+```{r echo=FALSE}
+randina$promedio <- rowMeans(randina[,2:21])
+max1<-randina[which.max(randina$promedio),1]
+max2 <- randina[which.max(randina$`2021*`),1]
+print(paste("El departamento que más área tiene en promedio a través de los años es ", max1))
+print(paste(" y el que más área de cultivo ha logrado tener en el último año es ", max2))
+```
+
+### Región Caribe
+
+```{r echo= FALSE}
+rcaribe <- area_anual[c(1,3,14,13,9),]
+rcaribe2 <- rcaribe[, -1]
+
+caribe <- c('Bolivar', 'Magdalena', 'La Guajira', 'Cesar')
+tcaribe <- t(rcaribe2)
+bolivar <- tcaribe[, 2]
+magdalena <- tcaribe[, 3]
+guajira <- tcaribe[, 4]
+cesar <- tcaribe[, 5]
+rcaribe3 <- data.frame(años, bolivar, magdalena, guajira, cesar) 
+rownames(rcaribe3) <- 1:nrow(rcaribe3)
+R_Caribe <- melt(rcaribe3, id.vars = "años")
+```
+
+La región Caribe (`r caribe`), tiene entre una de sus principales actividades económicas la agricultura, y entre sus producciones más importantes también se encuentra el café, por lo que es razonable pensar que tendrá un ára considerable dedicada al cultivo de café, aunque no más la región Andina pues esta región es mucho más pequeña y comprende muchos menos departamentos.
+
+```{=tex}
+\begin{center}
+Tabla 4: Área cultivada con café total (Región Caribe) 
+\end{center}
+```
+| Departamento | 2002     | ... | 2021     |
+|--------------|----------|:---:|----------|
+| Bolivar      |          | ... | 1,40372  |
+| Magdalena    | 17,45094 | ... | 17,65973 |
+| La Guajira   | 4,56954  | ... | 3,85375  |
+| Cesar        | 22,43447 | ... | 22,98944 |
+
+```{r echo=FALSE, warning=FALSE}
+
+R_Caribe%>%
+  ggplot(aes(x = años, y = value, color = variable))+
+  geom_line(lwd = 0.7)+
+  guides(color = guide_legend(title = "Departamento"))+
+  ggtitle("Área cultivada con café total (Región Caribe)")+
+  labs(x = "Año", y = "Miles de Hectareas")+
+  scale_color_discrete(labels = caribe)
+```
+
+Es notable la forma en la que destaca el departamento del Cesar, siendo el que más miles de hectareas tiene a lo largo del tiempo, llegando incluso a superar las 30 mil hectareas en el 2013
+
+```{r echo =  FALSE}
+total3 <- rcaribe%>%
+  select_if(is.numeric)%>%
+  colSums(na.rm = T)
+total3
+print(paste("En promedio, cada año la región tenía cerca de " ,round(mean(total3, na.rm = T)), "miles de hectareas "))
+```
+
+### Región Orinoquía
+
+```{r echo=FALSE}
+orinoquia <- c('Arauca', 'Casanare', 'Meta')
+orinoquia_num <- c(2, 7, 15)
+rorinoquia <- area_anual[orinoquia_num, ]
+rorinoquia2 <- rorinoquia[, -1]
+torinoquia <- t(rorinoquia2)
+arauca <- torinoquia[, 1]
+casanare <- torinoquia[, 2]
+meta <- torinoquia[, 3]
+rorinoquia3 <- data.frame(años, arauca, casanare, meta)
+R_orinoquia <- melt(rorinoquia3, id.vars = "años")
+
+```
+
+```{r echo=FALSE}
+max <- round(sum(rorinoquia$`2021*` ,na.rm = TRUE))
+```
+
+La región Orinoquía (`r orinoquia`), es una región también pequeña en extensión y la actividad agrícola no es su principal actividad económica, por lo que el área de cultivo para café es bastante pequeña también a comparación de otras regiones siendo de 5 mil hectareas en el último año.
+
+```{=tex}
+\begin{center}
+Tabla 5: Área cultivada con café total (Región Orinoquía) 
+\end{center}
+```
+| Departamento | 2007 | ... | 2021    |
+|--------------|------|:---:|---------|
+| Arauca       |      | ... | 0,10941 |
+| Casanare     | 2,6  | ... | 2,46888 |
+| Meta         | 2,4  | ... | 2,86762 |
+
+```{r echo=FALSE, warning=FALSE}
+R_orinoquia%>%
+  ggplot(aes(x = años, y = value, color = variable))+
+  geom_line(lwd = 0.7)+
+  guides(color = guide_legend(title = "Departamentos"))+
+  ggtitle("Área cultivada con café total (Región Orinoquía)")+
+  labs(x = "Año", y = "Miles de Hectareas")+
+  scale_color_discrete(labels = orinoquia)
+```
+
+Es notable como el departamento del Meta es el que más área dedica al café de toda la región y como Arauca es el departamento que menos hectareas dedica al café de todos los departamentos
+
+```{r echo= FALSE}
+total4 <- rorinoquia%>%
+  select_if(is.numeric)%>%
+  colSums(na.rm = T)
+total4
+print(paste("En promedio, cada año la región tenía cerca de " ,round(mean(total4, na.rm = T)), "miles de hectareas "))
+```
+
+### Región Pacífica
+
+```{r echo=FALSE}
+pacifico <- c('Cauca', 'Chocó', 'Nariño', 'Valle Del Cauca' )
+pacifico_num <- c(8, 10, 16, 23)
+rpacifica <- area_anual[pacifico_num, ]
+rpacifica2 <- rpacifica[, -1] 
+tpacifica <- t(rpacifica2) 
+cauca <- tpacifica[, 1]
+choco <- tpacifica[, 2]
+narino <- tpacifica[, 3]
+valle <- tpacifica[, 4]
+rpacifica3 <- data.frame(años, cauca, choco, narino, valle)
+rownames(rpacifica3) <- 1:nrow(rpacifica3)
+R_pacifica <- melt(rpacifica3, id.vars = "años")
+```
+
+La región del Pacífico (`r pacifico`), a pesar de que esta región tampoco se caracterizza por su actividad agraria, a pesar de eso es una región que también produce bastante café, llegando a tener 180 mil hectareas totales en 2021.
+
+```{=tex}
+\begin{center}
+Tabla 6: Área cultivada con café total (Región Andina) 
+\end{center}
+```
+| Departamento | 2002       | ... | 2021     |
+|--------------|------------|:---:|----------|
+| Cauca        | 65,68116   | ... | 93,0003  |
+| Chocó        |            | ... | 0,17898  |
+| Nariño       | 22,99809   | ... | 35,48601 |
+| Valle        | 86,5461444 | ... | 51,38494 |
+
+```{r echo=FALSE}
+R_pacifica%>%
+  ggplot(aes(x = años, y = value, color = variable))+
+  geom_line(lwd = 0.7)+
+  guides(color = guide_legend(title = "Departamentos"))+
+  ggtitle("Área cultivada con café total (Región Pacifica)")+
+  labs(x = "Año", y = "Miles de Hectareas")+
+  scale_color_discrete(labels = pacifico)
+```
+
+Se puede notar como destacan Cauca y Valle del Cauca, por ser los que más terreno dedican al cultivo de café, Cauca teniendo el crecimiento más importante y Valle del cauca un decrecimiento.
+
+```{r echo= FALSE}
+total5 <- rpacifica%>%
+  select_if(is.numeric)%>%
+  colSums(na.rm = T)
+total5
+print(paste("En promedio, cada año la región tenía cerca de " ,round(mean(total5, na.rm = T)), "miles de hectareas "))
+```
+
+```{r echo =FALSE}
+R.Amazonica <- mean(total1) 
+R.Andina <- mean(total2)
+R.Caribe <- mean(total3)
+R.Orinoquia <- mean(total4)
+R.Pacifica <- mean(total5)
+Media <- c(R.Amazonica, R.Andina, R.Caribe, R.Orinoquia, R.Pacifica)
+Region <- c('Amazónica', 'Andina', 'Caribe', 'Orinoquía', 'Pacífico')
+dataframe <- data.frame(Region, Media)
+
+```
+
+### Comparando a las regiones
+
+La siguiente gráfica muestra la media de área anual que ha tenido cada región en total:
+
+```{r echo= FALSE}
+dataframe%>%
+  ggplot(aes(x = Region, y = Media))+
+  geom_bar(stat = "identity")+ 
+  ggtitle("Media de Área por región")+
+  labs(x  = "Región", y = "Área (Miles de hctareas)")
+```
+
+Como se había comentado previamente, la región andina destaca ampliamente por sobre todas las demás, demostrando ser así la región más cafetera de Colombia.
+
+## Análisis Global
+
+```{r echo=FALSE}
+total_g <- area_anual%>%
+  select_if(is.numeric)%>%
+  colSums(na.rm = T)
+total_g2 <- data.frame(años, total_g)
+rownames(total_g2) <- 1:nrow(total_g2)
+```
+
+Ahora se procederá a hacer un análisis del cultivo de café en colombia en general, empezando por ver como ha evolucionado el área de café en Colombia, para eso se sumó el área de cada departamento por año, consiguiendo la siguiente gráfica:
+
+```{=tex}
+\begin{center}
+Tabla 7: Área cultivada con café total (Toda Colombia) 
+\end{center}
+```
+```{r echo=FALSE}
+kable(total_g2)
+```
+
+```{r echo=FALSE, warning=FALSE}
+
+total_g2%>%
+  ggplot(aes(x = años, y = total_g))+
+  geom_line()+
+  geom_point()+
+  ggtitle("Área cultivada con café total (Toda Colombia)")+
+  labs(x = "Año", y= "Miles de Hectareas")
+```
+
+Esta gráfica nos enseña como en los últimos 6 años ha habido un importante decrecimiento del área de cultivo de café en Colombia después de alcanzar su pico en el año 2013, llegando a tener poco más de 970 mil hectareas dedicadas al cultivo de café.
+
+### Área, Producción y Precio
+
+```{r echo=FALSE}
+Produccion <- read_excel("Producción.xlsx", sheet = "Hoja4")
+Produccion$años <- as.numeric(Produccion$años)
+prod <- Produccion$Producción
+```
+
+Otro factor importante a considerar es la Producción de café anual, que se puede ver evidenciada en la siguiente tabla:
+
+```{=tex}
+\begin{center}
+Tabla 8: Producción de café dada en miles de sacos de 60 Kg
+\end{center}
+```
+```{r echo=FALSE}
+kable(Produccion)
+```
+
+La siguiente gráfica mostrá la forma en la que ha comportado la producción del café desde el 2002:
+
+```{r echo=FALSE}
+Produccion%>%
+  ggplot(aes(x = años, y = Producción))+
+  geom_line()+
+  geom_point()+
+  ggtitle("Producción de café anual")+
+  labs(x = "Años", y = "Miles de sacos de 60 Kg")
+```
+
+Es de destacar la gran caída en las cantidades de café producidas desde el 2009, bajada que duró varios años para luego volver a subir a partir del 2013, año en el que precisamente Colombia llega a sumáximo de hectareas dedicadas al cultivo de café. Para comprobar esto veamos la siguiente gráfica:
+
+```{r echo=FALSE}
+area <- total_g
+prod <- Produccion$Producción
+comparacion <- data.frame(años, area, prod)
+comparacion%>%
+  ggplot(aes(x = años))+
+  geom_line(aes(y = area, colour= "area"), size = 1)+
+  geom_line(aes(y = prod/10, colour= "prod"), size = 1 )+
+  scale_y_continuous(sec.axis = sec_axis(~./10, name = " Decenas de Miles de sacos de café"))+
+  labs(x = "Años", y = "Miles de hectareas")+
+  ggtitle("Evolución de la producción vs el área de cultivo de café")+
+  scale_color_discrete(labels= c("Área", "Producción"))+
+  guides(color = guide_legend(title = "Variable"))
+```
+
+Se puede observar que en algunos momentos el área y la producción crecen a la par, pero para comprobar si realmente existe una relación de la una sobre la otra se hará uso de la regresión lineal.
+
+```{r echo = FALSE}
+comparacion%>%
+  ggplot(aes(x = area, y = prod, color = años))+
+  geom_point()+
+  geom_smooth(method = "lm", se = F)+
+  ggtitle("Área vs Producción")+
+  labs(x = "Área", y = "Producción")
+```
+
+Se puede ver que la relación es débil ya que la recta está demasiado lejos de la myoría de los puntos, pero para asegurar que no existe relación hacemos uso del coeficiente de correlación de Pearson. Para que se pueda considerar que existe una relación importante entre dos variables el coeficiente no de debe estar en el intervalo $-0.3<x<0.3$
+
+```{r}
+CP <- cor(x = area, y = prod, method = "pearson")
+print(paste("El coeficiente de correlación de Pearson es de ", CP, 
+" y al estar en el intervalo (-0.3, 0.3) se afirma que no existe relación alguna entre el área y la producción"))
+```
+
+Otro factor interesante de considerar también, es el precio interno que ha tenido el café durante estos años, y comprobar si este se ha visto influido de alguna manera por el área de cultivo o por la cantidad de café producido.
+
+```{r echo=FALSE}
+P_interno <- read_excel("precio interno.xlsx", sheet = "Hoja3")
+P_interno$año <- as.numeric(P_interno$año)
+```
+
+La siguiente tabla muestra el precio interno del café en colombia dado en pesos por carga de 125 Kg de café.
+
+```{=tex}
+\begin{center}
+Tabla 9: Precio interno del café en Colombia
+\end{center}
+```
+```{r echo=FALSE}
+kable(P_interno)
+```
+
+En la siguiente gráfica se puede apreciar el cambio en el precio a través de los años.
+
+```{r echo=FALSE}
+P_interno%>%
+  ggplot(aes(x = años, y = `Precio interno`))+
+  geom_line()+
+  labs(x = "Años", y = "Preció del Café")+
+  ggtitle("Precio interno del café en Colombia")+
+  geom_point()
+```
+
+Se puede apreciar, tanto en la tabla como en la gráfica, que el año en el que el café ha sido más barato o de menor precio, en los últimos 10 años, ha sido en el 2013.
+
+```{r}
+P_interno10 <- P_interno[which(P_interno >= 2010), ]
+P_interno10[which.min(P_interno10$`Precio interno`), ]
+```
+
+Al igual que antes, hay que comprobar si alguno de las otras dos variables, área y produccion, tiene alguna relación con el precio del café.
+
+```{r echo=FALSE}
+precio <- P_interno$`Precio interno`
+comparacion <- cbind(comparacion, precio)
+```
+
+Empezando por la producción, la siguiente gráfica de dispersión muestra como se llevan entre sí las dos variables.
+
+```{r echo=FALSE}
+comparacion%>%
+  ggplot(aes(x = prod, y = precio, color = años))+
+  geom_point()+
+  geom_smooth(method = "lm", se = F)+
+  ggtitle("Producción vs Precio Interno del café")+
+  labs(x = "Producción de café", y= "Precio interno del café")
+
+```
+
+En esta gráfica se podría evidenciar una relación muy leve entre las variables, pues los puntos parecen acomadarse bastante cercanos a la recta. Para ver si efectivamente hay una relación y que tan fuerte se volverá a hacer uso del coeficiente de correlación de Pearson.
+
+```{r}
+CP <- cor(x = prod, y = precio, method = "pearson")
+print(paste("El coeficiente de correlación de Pearson es de ", CP, " y al estar en el intervalo (-0.3, 0.3) se afirma que no existe relación alguna entre la producción y el área"))
+```
+
+Ahora se comprueba la relación entre el precio y el área
+
+```{r echo=FALSE}
+comparacion%>%
+  ggplot(aes(x = area, y = precio, color = años))+
+  geom_point()+
+  geom_smooth(method = "lm", se = F)+
+  ggtitle("Área vs Precio  ")+
+  labs(y = "Precio Promedio Anual", x = "Área anual (por miles de hectareas)")
+```
+
+Al igual que en las comparaciones anteriores, se procede a hacer el cálculo del coeficiente de Pearson para ver si existe relación entre estas variables.
+
+```{r}
+CP <- cor(x = prod, y = precio, method = "pearson")
+print(paste("El coeficiente de correlación de Pearson es de ", CP, " y al estar en el intervalo (-0.3, 0.3) se afirma que no existe relación alguna entre el área y el precio"))
+```
+
+# Conclusiones
+
+Se ha podido observar cómo distintos factores económicos; área de cultivo, precio y cantidad producida; relacionados con el café han cambiado a lo largo de los años. En lo que respecta al área, se ha podido demostrar que el mayor cultivo de café se encuentra en la región andina y que regiones como la amazónica o la pacífica son bastante débiles en lo que tiene ver con cultivo de café, mientras que las otras regiones mantienen una cantidad de hectáreas considerables. También se pudo notar un decrecimiento tanto en el área como en la producción en los últimos años mientras que a su vez también se pudo notar una subida de precio considerable. En lo que respecta al precio, se pudo probar cómo ni el área ni la cantidad de café producida influyen por sí solas en el precio, es posible que analizadas en conjunto a otras variables, como las exportaciones o el nivel de tecnificación de cada departamento o región, si que se pueda hallar una influencia en el precio interno, pero eso quedaría para futuras investigaciones. 
+
+# Referencias
+
+-   Dirección de Investigaciones Económicas -FNC. (2021, Julio 01). Exportaciones de café Colombiano. [Federación de cafeteros](https://view.officeapps.live.com/op/view.aspx?src=https%3A%2F%2Ffederaciondecafeteros.org%2Fapp%2Fuploads%2F2020%2F01%2FExportaciones.xlsx&wdOrigin=BROWSELINK)
